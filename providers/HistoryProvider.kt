@@ -28,6 +28,14 @@ class HistoryProvider {
     fun getHistories(): Query { // CONSULTA COMPUESTA - INDICE
         return db.whereEqualTo("idClient", authProvider.getId()).orderBy("timestamp", Query.Direction.DESCENDING)
     }
+    fun getHistorias(): Query {
+        return db
+    }
+    fun remove(IdHistory:String): Task<Void> {
+        return db.document(IdHistory).delete().addOnFailureListener { exception ->
+            Log.d("FIRESTORE", "ERROR: ${exception.message}")
+        }
+    }
 
     fun getHistoryById(id: String): Task<DocumentSnapshot> {
         return db.document(id).get()

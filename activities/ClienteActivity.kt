@@ -2,6 +2,7 @@ package com.carlosvicente.gaugegrafico.activities
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.*
 import androidx.core.widget.addTextChangedListener
@@ -38,9 +39,10 @@ class ClienteActivity : AppCompatActivity() {
 
         binding = ActivityClienteBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        progressDialog.showProgressBar(this)
         spConductores= findViewById(R.id.spinnerCliente)
         txtFiltro = findViewById(R.id.editTexFiltroC)
-        val listaClientes= arrayListOf("ID","Nombre" ,"Apellido","Email")
+        val listaClientes= arrayListOf("ID","Nombre" ,"Apellido","Email","Telefono")
         var adaptadorSp: ArrayAdapter<String> = ArrayAdapter(this,android.R.layout.simple_spinner_item,listaClientes)
         spConductores?.adapter= adaptadorSp
 
@@ -57,6 +59,7 @@ class ClienteActivity : AppCompatActivity() {
                 if (position== 1){campo="name"}
                 if (position== 2){campo="apellido"}
                 if (position== 3){campo="email"}
+                if (position== 4){campo="telefono"}
 
 
             }
@@ -73,23 +76,33 @@ class ClienteActivity : AppCompatActivity() {
         binding.editTexFiltroC.addTextChangedListener {userfilter ->
             if (campo=="id"){
                 val clientesFiltrados =  clientes.filter { cliente ->
-                    cliente.id!!.lowercase().contains(userfilter.toString().lowercase())}
+                  //  cliente.id!!.lowercase().contains(userfilter.toString().lowercase())}
+                    cliente.id?.lowercase()?.contains(userfilter.toString().lowercase()) == true}
                 adapter.updateCliente(clientesFiltrados)
             }
             if (campo=="name"){
-                val clientesFiltrados =  clientes.filter { conductor->
-                    conductor.name!!.lowercase().contains(userfilter.toString().lowercase())}
+                val clientesFiltrados =  clientes.filter { cliente->
+                  //  conductor.name!!.lowercase().contains(userfilter.toString().lowercase())}
+                    cliente.name?.lowercase()?.contains(userfilter.toString().lowercase()) == true}
                 adapter.updateCliente(clientesFiltrados)
 
             }
             if (campo== "apellido"){
-                val clientesFiltrados =  clientes.filter { conductor->
-                    conductor.lastname!!.lowercase().contains(userfilter.toString().lowercase())}
+                val clientesFiltrados =  clientes.filter { cliente->
+                   // cliente.lastname!!.lowercase().contains(userfilter.toString().lowercase())}
+                    cliente.lastname?.lowercase()?.contains(userfilter.toString().lowercase()) == true}
                 adapter.updateCliente(clientesFiltrados)
             }
             if (campo=="email"){
-                val clientesFiltrados =  clientes.filter { conductor->
-                    conductor.email!!.lowercase().contains(userfilter.toString().lowercase())}
+                val clientesFiltrados =  clientes.filter { cliente->
+                    //cliente.email!!.lowercase().contains(userfilter.toString().lowercase())}
+                    cliente.email?.lowercase()?.contains(userfilter.toString().lowercase()) == true}
+                adapter.updateCliente(clientesFiltrados)
+            }
+            if (campo=="telefono"){
+                val clientesFiltrados =  clientes.filter { cliente->
+                    //cliente.email!!.lowercase().contains(userfilter.toString().lowercase())}
+                    cliente.phone?.lowercase()?.contains(userfilter.toString().lowercase()) == true}
                 adapter.updateCliente(clientesFiltrados)
             }
 
@@ -101,6 +114,7 @@ class ClienteActivity : AppCompatActivity() {
 
 
     }
+
 
 
     private fun getCliente() {
@@ -122,7 +136,7 @@ class ClienteActivity : AppCompatActivity() {
                     binding.recyclerViewClientes.adapter = adapter
                 }
             }
-            // progressDialog.hideProgressBar(this)
+             progressDialog.hideProgressBar(this)
         }
     }
 }

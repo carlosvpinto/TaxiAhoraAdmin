@@ -37,6 +37,11 @@ class SolicitudesProvider {
             Log.d("STORAGE", "ERROR: ${it.message}")
         }
     }
+    fun remove(IdSolicitud:String): Task<Void> {
+        return db.document(IdSolicitud).delete().addOnFailureListener { exception ->
+            Log.d("FIRESTORE", "ERROR: ${exception.message}")
+        }
+    }
 
     fun getImageUrl(): Task<Uri> {
         return storage.downloadUrl
@@ -44,9 +49,9 @@ class SolicitudesProvider {
 
    //traer todo los datos de driver**************
 
-    fun getConductorById(id: String): Task<DocumentSnapshot> {
-        return db.document(id).get()
-    }
+//    fun getConductorById(id: String): Task<DocumentSnapshot> {
+//        return db.document(id).get()
+//    }
     fun getSolicitudes(): Query {
         return db
     }

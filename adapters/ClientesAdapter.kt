@@ -29,10 +29,12 @@ class ClientesAdapter(val context: Activity, var clientes: ArrayList<Client>): R
 
         val cliente =  clientes[position] // UN SOLO HISTORIAL
         holder.textId.text = cliente.id
-        holder.textNombreConductor.text = cliente.name +" "+ cliente.lastname
+        holder.textNombreCliente.text = cliente.name + " " + cliente.lastname
+        //holder.textApellidoCliente.text = cliente.lastname
         Glide.with(holder.imgFotoCliente.context).load(cliente.image).into(holder.imgFotoCliente)
         holder.textEmail.text = cliente.email
-        holder.txtTotalCliente.text = totalCliente.toString()
+        holder.tlfCliente.text = cliente.phone
+
         holder.itemView.setOnClickListener { goToDetail(cliente?.id!!) }
     }
 
@@ -44,8 +46,8 @@ class ClientesAdapter(val context: Activity, var clientes: ArrayList<Client>): R
 
     // EL TAMAñO DE LA LISTA QUE VAMOS A MOSTRAR
     override fun getItemCount(): Int {
-        totalCliente = clientes.size
-        Log.d("TOTAL", "totalCliente: $totalCliente ")
+        val textView = context.findViewById<TextView>(R.id.txtTotalFiltro)
+        textView.text= clientes.size.toString()
         return clientes.size
 
 
@@ -60,18 +62,22 @@ class ClientesAdapter(val context: Activity, var clientes: ArrayList<Client>): R
     class ClientesAdapterViewHolder(view: View): RecyclerView.ViewHolder(view) {
 
         val textId: TextView
-        val textNombreConductor: TextView
+        val textNombreCliente: TextView
+        //val textApellidoCliente: TextView
         val textEmail: TextView
         val imgFotoCliente: ImageView
-        val txtTotalCliente: TextView
+        val tlfCliente:TextView
+
 
 
         init {
             textId= view.findViewById(R.id.textIdCliente)
-            textNombreConductor = view.findViewById(R.id.textNombreCliente)
-            textEmail = view.findViewById(R.id.textEmailCliente)
+            textNombreCliente = view.findViewById(R.id.textNombreCliente)
+            //textApellidoCliente = view.findViewById(R.id.textApellidoClienteDetail)
+            textEmail = view.findViewById(R.id.textEmailCliente2)
             imgFotoCliente= view.findViewById(R.id.imgFotoCliente)
-            txtTotalCliente = view.findViewById(R.id.txtTotalClienteCard)
+            tlfCliente=view.findViewById(R.id.textTelefonoClienteCard)
+
 
         }
 

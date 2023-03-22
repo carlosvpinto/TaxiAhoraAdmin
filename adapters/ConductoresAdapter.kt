@@ -30,7 +30,6 @@ class ConductoresAdapter(val context: Activity, var conductores: ArrayList<Drive
         holder.textId.text = conductor.id
         holder.textNombreConductor.text = conductor.name +" "+ conductor.lastname
         holder.textEmail.text = conductor.email
-
         holder.itemView.setOnClickListener { goToDetail(conductor?.id!!) }
     }
 
@@ -42,6 +41,8 @@ class ConductoresAdapter(val context: Activity, var conductores: ArrayList<Drive
 
     // EL TAMAñO DE LA LISTA QUE VAMOS A MOSTRAR
     override fun getItemCount(): Int {
+        val textView = context.findViewById<TextView>(R.id.txtTotalFiltro)
+        textView.text= conductores.size.toString()
         return conductores.size
 
 

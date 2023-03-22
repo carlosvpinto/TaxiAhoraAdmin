@@ -46,6 +46,9 @@ class SolicitudesActivity : AppCompatActivity() {
 
         binding = ActivitySolicitudesBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        progressDialog.showProgressBar(this)
+
         spSolicitudes= findViewById(R.id.spinnerSolicitud)
         txtFiltro = findViewById(R.id.editTexFiltroSoli)
         val listaSolicitudes= arrayListOf("ID","destino" ,"email","fecha","idCliente","idConductor","apellidoCliente","nombreCliente","origen","telefono")
@@ -84,53 +87,63 @@ class SolicitudesActivity : AppCompatActivity() {
         binding.editTexFiltroSoli.addTextChangedListener {userfilter ->
             if (campo=="id"){
                 val solicitudesFiltrados =  solicitudes.filter { solicitud->
-                    solicitud.id!!.lowercase().contains(userfilter.toString().lowercase())}
+                    solicitud.id?.lowercase()?.contains(userfilter.toString().lowercase())==true}
+               // historiaC.idDriver?.lowercase()?.contains(userfilter.toString().lowercase()) == true
                 adapter.updateSolicitudes(solicitudesFiltrados)
             }
             if (campo=="destino"){
                 val solicitudesFiltrados =  solicitudes.filter { solicitud->
-                    solicitud.destination!!.lowercase().contains(userfilter.toString().lowercase())}
+                  //  solicitud.destination!!.lowercase().contains(userfilter.toString().lowercase())}
+                solicitud.destination?.lowercase()?.contains(userfilter.toString().lowercase())==true}
                 adapter.updateSolicitudes(solicitudesFiltrados)
             }
             if (campo== "email"){
                 val solicitudesFiltrados =  solicitudes.filter { solicitud->
-                    solicitud.email!!.lowercase().contains(userfilter.toString().lowercase())}
+                    //solicitud.email!!.lowercase().contains(userfilter.toString().lowercase())}
+                    solicitud.email?.lowercase()?.contains(userfilter.toString().lowercase())==true}
                 adapter.updateSolicitudes(solicitudesFiltrados)
             }
             if (campo=="fecha"){
                 val solicitudesFiltrados =  solicitudes.filter { solicitud->
-                    solicitud.fecha!!.toString().lowercase().contains(userfilter.toString().lowercase())}
+                    //solicitud.fecha!!.toString().lowercase().contains(userfilter.toString().lowercase())}
+                    solicitud.fecha?.toString()?.lowercase()?.contains(userfilter.toString().lowercase())==true}
                 adapter.updateSolicitudes(solicitudesFiltrados)
             }
 
             if (campo== "idCliente"){
                 val solicitudesFiltrados =  solicitudes.filter { solicitud->
-                    solicitud.idClient!!.lowercase().contains(userfilter.toString().lowercase())}
+                   // solicitud.idClient!!.lowercase().contains(userfilter.toString().lowercase())}
+                    solicitud.idClient?.lowercase()?.contains(userfilter.toString().lowercase())==true}
                 adapter.updateSolicitudes(solicitudesFiltrados)
             }
             if (campo== "idConductor"){
                 val solicitudesFiltrados =  solicitudes.filter { solicitud->
-                    solicitud.idDriver!!.lowercase().contains(userfilter.toString().lowercase())}
+                  //  solicitud.idDriver!!.lowercase().contains(userfilter.toString().lowercase())}
+                    solicitud.idDriver?.lowercase()?.contains(userfilter.toString().lowercase())==true}
                 adapter.updateSolicitudes(solicitudesFiltrados)
             }
             if (campo== "apellidoCliente"){
                 val solicitudesFiltrados =  solicitudes.filter { solicitud->
-                    solicitud.lastname!!.lowercase().contains(userfilter.toString().lowercase())}
+                  //  solicitud.lastname!!.lowercase().contains(userfilter.toString().lowercase())}
+                    solicitud.lastname?.lowercase()?.contains(userfilter.toString().lowercase())==true}
                 adapter.updateSolicitudes(solicitudesFiltrados)
             }
             if (campo== "nombreCliente"){
                 val solicitudesFiltrados =  solicitudes.filter { solicitud->
-                    solicitud.name!!.lowercase().contains(userfilter.toString().lowercase())}
+                   // solicitud.name!!.lowercase().contains(userfilter.toString().lowercase())}
+                    solicitud.name?.lowercase()?.contains(userfilter.toString().lowercase())==true}
                 adapter.updateSolicitudes(solicitudesFiltrados)
             }
             if (campo== "origen"){
                 val solicitudesFiltrados =  solicitudes.filter { solicitud->
-                    solicitud.origin!!.lowercase().contains(userfilter.toString().lowercase())}
+                 //   solicitud.origin!!.lowercase().contains(userfilter.toString().lowercase())}
+                    solicitud.origin?.lowercase()?.contains(userfilter.toString().lowercase())==true}
                 adapter.updateSolicitudes(solicitudesFiltrados)
             }
             if (campo== "telefono"){
                 val solicitudesFiltrados =  solicitudes.filter { solicitud->
-                    solicitud.phone!!.lowercase().contains(userfilter.toString().lowercase())}
+                   // solicitud.phone!!.lowercase().contains(userfilter.toString().lowercase())}
+                    solicitud.phone?.lowercase()?.contains(userfilter.toString().lowercase())==true}
                 adapter.updateSolicitudes(solicitudesFiltrados)
             }
 
@@ -163,7 +176,7 @@ class SolicitudesActivity : AppCompatActivity() {
                     binding.recyclerViewSolicitud.adapter = adapter
                 }
             }
-            // progressDialog.hideProgressBar(this)
+             progressDialog.hideProgressBar(this)
         }
     }
 

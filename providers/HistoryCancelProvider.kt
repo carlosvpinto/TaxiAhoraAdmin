@@ -25,10 +25,21 @@ class HistoryCancelProvider {
     fun getHistoryByIdCancel(id: String): Task<DocumentSnapshot> {
         return db.document(id).get()
     }
+    fun getHistoryCancelId(idHistorycancel: String): Task<DocumentSnapshot> {
+        return db.document(idHistorycancel).get()
+    }
 
     fun getLastHistoryCancel(): Query { // CONSULTA COMPUESTA - INDICE
         return db.whereEqualTo("idDriver", authProvider.getId()).orderBy("timestamp", Query.Direction.DESCENDING).limit(1)
 
+    }
+    fun getHistoryCancel(): Query {
+        return db
+    }
+    fun remove(IdHistoryCancel:String): Task<Void> {
+        return db.document(IdHistoryCancel).delete().addOnFailureListener { exception ->
+            Log.d("FIRESTORE", "ERROR: ${exception.message}")
+        }
     }
 
     fun getHistoriesCancel(): Query { // CONSULTA COMPUESTA - INDICE

@@ -9,52 +9,73 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.carlosvicente.gaugegrafico.R
 import com.carlosvicente.gaugegrafico.activities.HistoriesDetailActivity
+import com.carlosvicente.gaugegrafico.activities.HistoryCancelDetailActivity
 import com.carlosvicente.gaugegrafico.models.History
+import com.carlosvicente.gaugegrafico.models.HistoryCancel
 import com.carlosvicente.gaugegrafico.utils.RelativeTime
 
-class HistoriesAdapter(val context: Activity, val histories: ArrayList<History>): RecyclerView.Adapter<HistoriesAdapter.HistoriesAdapterViewHolder>() {
+class HistoresAdapter(val context: Activity, var historias: ArrayList<History>): RecyclerView.Adapter<HistoresAdapter.HistoryAdapterViewHolder>() {
 
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): HistoriesAdapterViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): HistoryAdapterViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.cardview_history, parent, false)
-        return HistoriesAdapterViewHolder(view)
+        return HistoryAdapterViewHolder(view)
     }
 
     // ESTABLECER LA INFORMACION
-    override fun onBindViewHolder(holder: HistoriesAdapterViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: HistoryAdapterViewHolder, position: Int) {
 
-        val history =  histories[position] // UN SOLO HISTORIAL
-        holder.textViewOrigin.text = history.origin
-        holder.textViewDestination.text = history.destination
-        if (history.timestamp != null) {
-            holder.textViewDate.text = RelativeTime.getTimeAgo(history.timestamp!!, context)
-        }
+        val histoy =  historias[position] // UN SOLO HISTORIAL
 
-        holder.itemView.setOnClickListener { goToDetail(history?.id!!) }
+
+        holder.textIdHistorias.text = histoy.id
+        holder.textFechaHistorias.text = histoy.date.toString()
+        holder.textIdClientHistorias.text = histoy.idClient
+        holder.textIdCondHisytorias.text = histoy.idDriver
+        holder.textDestinoHistorias.text = histoy.destination
+
+
+        holder.itemView.setOnClickListener { goToDetail(histoy?.id!!) }
     }
 
-    private fun goToDetail(idHistory: String) {
+    private fun goToDetail(idHistoria: String) {
         val i = Intent(context, HistoriesDetailActivity::class.java)
-        i.putExtra("id", idHistory)
+        i.putExtra("id", idHistoria)
         context.startActivity(i)
     }
 
     // EL TAMAñO DE LA LISTA QUE VAMOS A MOSTRAR
     override fun getItemCount(): Int {
-        return histories.size
+
+        val textView = context.findViewById<TextView>(R.id.txtTotalFiltro)
+        textView.text= historias.size.toString()
+        return historias.size
+
+
+    }
+    fun updateHistory(historysList: List<History> ){
+        this.historias = historysList as ArrayList<History>
+        notifyDataSetChanged()
     }
 
 
-    class HistoriesAdapterViewHolder(view: View): RecyclerView.ViewHolder(view) {
 
-        val textViewOrigin: TextView
-        val textViewDestination: TextView
-        val textViewDate: TextView
+    class HistoryAdapterViewHolder(view: View): RecyclerView.ViewHolder(view) {
+
+        val textIdHistorias: TextView
+        val textFechaHistorias: TextView
+        val textIdClientHistorias: TextView
+        val textIdCondHisytorias: TextView
+        val textDestinoHistorias: TextView
+
 
         init {
-            textViewOrigin = view.findViewById(R.id.textViewOrigin)
-            textViewDestination = view.findViewById(R.id.textViewDestination)
-            textViewDate = view.findViewById(R.id.textViewDate)
+            textIdHistorias= view.findViewById(R.id.textIdHistorias)
+            textFechaHistorias= view.findViewById(R.id.textFechaHistorias)
+            textIdClientHistorias = view.findViewById(R.id.textIdCHistorias)
+            textIdCondHisytorias = view.findViewById(R.id.textIdCondHIstorias)
+            textDestinoHistorias= view.findViewById(R.id.textDestinoHistoria)
+
         }
 
     }

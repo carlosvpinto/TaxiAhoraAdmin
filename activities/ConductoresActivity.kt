@@ -11,7 +11,7 @@ import androidx.core.widget.addTextChangedListener
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.carlosvicente.gaugegrafico.R
 import com.carlosvicente.gaugegrafico.adapters.ConductoresAdapter
-import com.carlosvicente.gaugegrafico.adapters.HistoriesAdapter
+///import com.carlosvicente.gaugegrafico.adapters.HistoriesAdapter
 import com.carlosvicente.gaugegrafico.databinding.ActivityConductoresBinding
 import com.carlosvicente.gaugegrafico.databinding.ActivityHistoryBinding
 import com.carlosvicente.gaugegrafico.models.Driver
@@ -51,9 +51,12 @@ class ConductoresActivity : AppCompatActivity() {
 
         binding = ActivityConductoresBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        progressDialog.showProgressBar(this)
+
         spConductores= findViewById(R.id.spinnerConductor)
         txtFiltro = findViewById(R.id.editTexFiltro)
-        val listaConductores= arrayListOf("ID","Nombre" ,"Apellido","Email","Placa")
+        val listaConductores= arrayListOf("ID","Nombre" ,"Apellido","Email","Placa","Color")
         var adaptadorSp: ArrayAdapter<String> = ArrayAdapter(this,android.R.layout.simple_spinner_item,listaConductores)
         spConductores?.adapter= adaptadorSp
 
@@ -71,6 +74,7 @@ class ConductoresActivity : AppCompatActivity() {
                 if (position== 2){campo="apellido"}
                 if (position== 3){campo="email"}
                 if (position== 4){campo="placa"}
+                if (position== 5){campo="color"}
 
             }
 
@@ -88,28 +92,36 @@ class ConductoresActivity : AppCompatActivity() {
         binding.editTexFiltro.addTextChangedListener {userfilter ->
             if (campo=="id"){
                 val conductoresFiltrados =  conductores.filter { conductor->
-                    conductor.id!!.lowercase().contains(userfilter.toString().lowercase())}
+
+                conductor.id?.lowercase()?.contains(userfilter.toString().lowercase()) == true}
                 adapter.updateConductor(conductoresFiltrados)
             }
             if (campo=="name"){
                 val conductoresFiltrados =  conductores.filter { conductor->
-                    conductor.name!!.lowercase().contains(userfilter.toString().lowercase())}
+                conductor.name?.lowercase()?.contains(userfilter.toString().lowercase()) == true}
                 adapter.updateConductor(conductoresFiltrados)
             }
             if (campo== "apellido"){
                 val conductoresFiltrados =  conductores.filter { conductor->
-                    conductor.lastname!!.lowercase().contains(userfilter.toString().lowercase())}
+                    conductor.lastname?.lowercase()?.contains(userfilter.toString().lowercase()) == true}
                 adapter.updateConductor(conductoresFiltrados)
             }
             if (campo=="email"){
                 val conductoresFiltrados =  conductores.filter { conductor->
-                    conductor.email!!.lowercase().contains(userfilter.toString().lowercase())}
+
+                    conductor.email?.lowercase()?.contains(userfilter.toString().lowercase()) == true}
                 adapter.updateConductor(conductoresFiltrados)
             }
 
             if (campo== "placa"){
                 val conductoresFiltrados =  conductores.filter { conductor->
-                    conductor.plateNumber!!.lowercase().contains(userfilter.toString().lowercase())}
+                   // conductor.plateNumber!!.lowercase().contains(userfilter.toString().lowercase())}
+                    conductor.plateNumber?.lowercase()?.contains(userfilter.toString().lowercase()) == true}
+                adapter.updateConductor(conductoresFiltrados)
+            }
+            if (campo== "Color"){
+                val conductoresFiltrados =  conductores.filter { conductor->
+                conductor.brandCar?.lowercase()?.contains(userfilter.toString().lowercase()) == true}
                 adapter.updateConductor(conductoresFiltrados)
             }
 
@@ -141,7 +153,7 @@ class ConductoresActivity : AppCompatActivity() {
                     binding.recyclerViewConductores.adapter = adapter
                 }
             }
-           // progressDialog.hideProgressBar(this)
+            progressDialog.hideProgressBar(this)
         }
     }
 

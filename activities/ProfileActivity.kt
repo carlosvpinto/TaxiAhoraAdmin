@@ -67,7 +67,7 @@ class ProfileActivity : AppCompatActivity() {
 
                     clientProvider.update(client).addOnCompleteListener {
                         if (it.isSuccessful) {
-
+                            progressDialog.hideProgressBar(this)
                             Toast.makeText(this@ProfileActivity, "Datos actualizados correctamente", Toast.LENGTH_LONG).show()
                         }
                         else {

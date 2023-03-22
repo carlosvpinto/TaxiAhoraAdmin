@@ -3,16 +3,16 @@ package com.carlosvicente.gaugegrafico.providers
 import android.util.Log
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.tasks.Task
-import com.google.firebase.firestore.DocumentReference
-import com.google.firebase.firestore.DocumentSnapshot
-import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.GeoPoint
+import com.google.firebase.firestore.*
+import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.ktx.Firebase
 import org.imperiumlabs.geofirestore.GeoFirestore
 import org.imperiumlabs.geofirestore.GeoQuery
 
 class GeoProvider {
 
     val collection = FirebaseFirestore.getInstance().collection("Locations")
+    val db = Firebase.firestore.collection("Locations")
     val collectionWorking = FirebaseFirestore.getInstance().collection("LocationsWorking")
     //PARA MOTOS
     val collectionMoto = FirebaseFirestore.getInstance().collection("LocationsMoto")
@@ -51,6 +51,10 @@ class GeoProvider {
         return collection.document(idDriver).get().addOnFailureListener { exception ->
             Log.d("FIREBASE", "ERROR: ${exception.toString()}")
         }
+    }
+
+    fun getLocationTodos(): Query {
+        return db
     }
     fun getLocationWorking(idDriver: String): DocumentReference {
         return collectionWorking.document(idDriver)

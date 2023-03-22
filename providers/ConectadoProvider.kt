@@ -15,11 +15,11 @@ import com.google.firebase.firestore.Query
 import com.google.firebase.messaging.FirebaseMessaging
 import java.io.File
 
-class DriverProvider {
+class ConectadoProvider {
 
 
     val authProvider = AuthProvider()
-    val db = Firebase.firestore.collection("Drivers")
+    val db = Firebase.firestore.collection("Locations")
     var storage = FirebaseStorage.getInstance().getReference().child("profile")
 
     fun create(driver: Driver): Task<Void> {
@@ -41,12 +41,12 @@ class DriverProvider {
         return storage.downloadUrl
     }
 
-   //traer todo los daos de driver**************
+   //traer todo los datos de Locations**************
 
     fun getConductorById(id: String): Task<DocumentSnapshot> {
         return db.document(id).get()
     }
-    fun getDriver(): Query {
+    fun getLocations(): Query {
         return db
     }
 

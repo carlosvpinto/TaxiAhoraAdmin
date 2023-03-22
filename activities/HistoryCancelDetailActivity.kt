@@ -1,53 +1,61 @@
 package com.carlosvicente.gaugegrafico.activities
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.view.WindowManager
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.Toast
-import com.bumptech.glide.Glide
+import androidx.core.app.ActivityCompat
 import com.carlosvicente.gaugegrafico.R
-//import com.carlosvicente.uberkotlin.databinding.ActivityHistoriesDetailBinding
+import com.carlosvicente.gaugegrafico.databinding.ActivityHistoryCancelDetailBinding
 import com.carlosvicente.gaugegrafico.databinding.ActivityHistoryDetailBinding
-
+import com.carlosvicente.gaugegrafico.databinding.ActivitySolicitudesDetailBinding
 import com.carlosvicente.gaugegrafico.models.Client
 import com.carlosvicente.gaugegrafico.models.Driver
-import com.carlosvicente.gaugegrafico.models.History
-import com.carlosvicente.gaugegrafico.providers.ClientProvider
+import com.carlosvicente.gaugegrafico.models.HistoryCancel
+import com.carlosvicente.gaugegrafico.models.Solicitudes
 import com.carlosvicente.gaugegrafico.providers.DriverProvider
-import com.carlosvicente.gaugegrafico.providers.HistoryProvider
-import com.carlosvicente.gaugegrafico.utils.RelativeTime
+import com.carlosvicente.gaugegrafico.providers.HistoryCancelProvider
+import com.carlosvicente.gaugegrafico.providers.SolicitudesProvider
 import com.tommasoberlose.progressdialog.ProgressDialogFragment
+import java.util.*
 
-class HistoriesDetailActivity : AppCompatActivity() {
+class HistoryCancelDetailActivity : AppCompatActivity() {
 
-    private val rotateOpen: Animation by lazy { AnimationUtils.loadAnimation(this, R.anim.rotate_open_anim) }
-    private val rotateClose: Animation by lazy { AnimationUtils.loadAnimation(this, R.anim.rotate_close_anim) }
-    private val fromBottom: Animation by lazy { AnimationUtils.loadAnimation(this, R.anim.from_bottom_anim) }
-    private val toBottom: Animation by lazy { AnimationUtils.loadAnimation(this, R.anim.to_bottom_anim) }
+    private val rotateOpen: Animation by lazy { AnimationUtils.loadAnimation(this,R.anim.rotate_open_anim) }
+    private val rotateClose: Animation by lazy { AnimationUtils.loadAnimation(this,R.anim.rotate_close_anim) }
+    private val fromBottom: Animation by lazy { AnimationUtils.loadAnimation(this,R.anim.from_bottom_anim) }
+    private val toBottom: Animation by lazy { AnimationUtils.loadAnimation(this,R.anim.to_bottom_anim) }
 
-    private lateinit var binding: ActivityHistoryDetailBinding
-    private var historyProvider = HistoryProvider()
+    private lateinit var binding: ActivityHistoryCancelDetailBinding
+    private var historyCancelProvider = HistoryCancelProvider()
     private var driverProvider = DriverProvider()
     private var extraId = ""
-    private var clicked = false
     private var progressDialog = ProgressDialogFragment
+    private var historysCancel: HistoryCancel? = null
+    var historiaCancel: HistoryCancel? = null
+    private var driver: Driver?=null
+    val REQUEST_PHONE_CALL = 30
+    private var clicked = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityHistoryDetailBinding.inflate(layoutInflater)
+        binding = ActivityHistoryCancelDetailBinding.inflate(layoutInflater)
         setContentView(binding.root)
         window.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
 
-        progressDialog.showProgressBar(this)
+        // progressDialog.showProgressBar(this)
         extraId = intent.getStringExtra("id")!!
-        getHistory()
+        getHistoryCancel()
 
         binding.imageViewBack.setOnClickListener { finish() }
-
         binding.addbtn.setOnClickListener{
             onAddButtonClicked()
         }
@@ -55,8 +63,29 @@ class HistoriesDetailActivity : AppCompatActivity() {
             updateInfo()
         }
         binding.floatingActionDelete.setOnClickListener {
-            deleteHistory()
+            deleteHistCancel()
         }
+        binding.layoutIdCliente.setOnClickListener {
+            iraCliente()
+        }
+        binding.layoutConductor.setOnClickListener {
+            Log.d("IRACONDUCTOR", "iraConductor: Entro")
+            iraConductor()
+        }
+
+    }
+
+    //BUSCA AL CLIENTE SELECIONADO
+    private fun iraCliente() {
+        val i = Intent(this, ClientesDetailActivity::class.java)
+        i.putExtra("id", binding.textIdCliente.text.toString())
+        this.startActivity(i)
+    }
+    private fun iraConductor() {
+        Log.d("IRACONDUCTOR", "iraConductor: Entro")
+        val i = Intent(this, ConductoresDetailActivity::class.java)
+        i.putExtra("id", binding.textViewIdConductor.text.toString())
+        this.startActivity(i)
     }
 
     //PARA FUNCIONAR LOS FLOATING*******************
@@ -103,36 +132,8 @@ class HistoriesDetailActivity : AppCompatActivity() {
         }
     }
 
-    //ELIMINA LAS HISTORIAS ****************
-    private fun deleteHistory() {
-        progressDialog.showProgressBar(this)
-        val idHistory = binding.textViewIdHistoria.text.toString()
-
-        if (idHistory!=null){
-            historyProvider.remove(idHistory).addOnCompleteListener {
-                if (it.isSuccessful) {
-                    progressDialog.hideProgressBar(this)
-                    Toast.makeText(this@HistoriesDetailActivity, "Datos actualizados correctamente", Toast.LENGTH_LONG).show()
-                    goToHistoryActivity()
-                }
-                else {
-                    progressDialog.hideProgressBar(this)
-                    Toast.makeText(this@HistoriesDetailActivity, "No se pudo actualizar la informacion", Toast.LENGTH_LONG).show()
-                }
-            }
-        }
-    }
-    //envia al el Activity Historia
-    private fun goToHistoryActivity() {
-        val i = Intent(this, HistoriesActivity::class.java)
-        //i.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-        startActivity(i)
-    }
-
-
-    //ACTUALIZA LA INFORMACION DE LA HISTORIA
+    //ACTUALIZA LA INFORMACION DEL CLIENTE
     private fun updateInfo() {
-        Toast.makeText(this, "No se puede Modificar los datos de historia", Toast.LENGTH_LONG).show()
 //        progressDialog.showProgressBar(this)
 //        val name = binding.textNombreClienteDetail.text.toString()
 //        val lastname = binding.textApellidoClienteDetail.text.toString()
@@ -182,35 +183,76 @@ class HistoriesDetailActivity : AppCompatActivity() {
 
     }
 
-    private fun getHistory() {
-        historyProvider.getHistoryById(extraId).addOnSuccessListener { document ->
+    //ELIMINA LAS HISTORIAS CANCELADAS****************
+    private fun deleteHistCancel() {
+        progressDialog.showProgressBar(this)
+        val idHistoryCancel = binding.textViewIdHistoria.text.toString()
+
+        if (idHistoryCancel!=null){
+            historyCancelProvider.remove(idHistoryCancel).addOnCompleteListener {
+                if (it.isSuccessful) {
+                    progressDialog.hideProgressBar(this)
+                    Toast.makeText(this@HistoryCancelDetailActivity, "Datos actualizados correctamente", Toast.LENGTH_LONG).show()
+                    goToHistoryCancelActivity()
+                }
+                else {
+                    progressDialog.hideProgressBar(this)
+                    Toast.makeText(this@HistoryCancelDetailActivity, "No se pudo actualizar la informacion", Toast.LENGTH_LONG).show()
+                }
+            }
+        }
+    }
+    //envia al el Activiti Soliccitud
+    private fun goToHistoryCancelActivity() {
+        val i = Intent(this, HistoryCancelActivity::class.java)
+        //i.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(i)
+    }
+
+
+
+
+    private fun getHistoryCancel() {
+        historyCancelProvider.getHistoryCancelId(extraId).addOnSuccessListener { document ->
 
             if (document.exists()) {
-                val history = document.toObject(History::class.java)
-                binding.textViewIdHistoria.text= extraId
-                binding.textViewOrigin.text = history?.origin
-                binding.textViewDestination.text = history?.destination
-                binding.textViewDate.text = RelativeTime.getTimeAgo(history?.timestamp!!, this@HistoriesDetailActivity)
-                binding.textViewDateFija.text= history?.date.toString()
-                binding.textViewPrice.text = "${String.format("%.1f", history?.price)}$"
-                binding.textViewMyCalification.text = "${history?.calificationToDriver}"
-                binding.textViewClientCalification.text = "${history?.calificationToClient}"
-                binding.textViewTimeAndDistance.text = "${history?.time} Min - ${String.format("%.1f", history?.km)} Km"
-                getDriverInfo(history?.idDriver!!)
+
+
+                historiaCancel = document.toObject(HistoryCancel::class.java)
+                binding.textViewIdHistoria.setText(extraId)
+                binding.textIdCliente.text=historiaCancel?.idClient.toString()
+                binding.textViewIdConductor.text=historiaCancel?.idDriver.toString()
+                binding.textView4.text=historiaCancel?.destination
+                binding.textView5.text= historiaCancel?.fecha.toString()
+                binding.textView6.text=historiaCancel?.causa
+                binding.textView7.text= historiaCancel?.causaConductor
+                binding.textView8.text= historiaCancel?.km.toString()
+
+
+
+                getDriverInfo(historiaCancel?.idDriver!!)
             }
 
         }
     }
 
-    private fun getDriverInfo(id: String) {
-        driverProvider.getDriver(id).addOnSuccessListener { document ->
-            if (document.exists()) {
-                val driver = document.toObject(Driver::class.java)
-                binding.textViewEmail.text = driver?.email
-                binding.textViewName.text = "${driver?.name} ${driver?.lastname}"
+    //LLAMAR POR TELEFONO
+    private fun call(phone: String) {
 
+        val i = Intent(Intent.ACTION_CALL)
+        i.data = Uri.parse("tel:$phone")
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+            return
+        }
+
+        this.startActivity(i)
+    }
+    private fun getDriverInfo(Iddriver:String) {
+        driverProvider.getDriver(Iddriver).addOnSuccessListener { document ->
+            if (document.exists()) {
+                driver = document.toObject(Driver::class.java)
             }
         }
-        progressDialog.hideProgressBar(this)
     }
 }

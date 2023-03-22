@@ -1,8 +1,12 @@
 package com.carlosvicente.gaugegrafico.activities
 
 import android.Manifest
+import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -10,13 +14,19 @@ import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
+import android.view.animation.Animation
+import android.view.animation.AnimationUtils
 import android.widget.ArrayAdapter
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.bitmap.CenterCrop
 import com.carlosvicente.gaugegrafico.R
 import com.carlosvicente.gaugegrafico.databinding.ActivityClientesDetailBinding
 import com.carlosvicente.gaugegrafico.databinding.ActivityConductoresDetailBinding
@@ -28,17 +38,32 @@ import com.carlosvicente.gaugegrafico.providers.ClientProvider
 import com.carlosvicente.gaugegrafico.providers.DriverProvider
 import com.carlosvicente.gaugegrafico.providers.HistoryProvider
 import com.carlosvicente.gaugegrafico.utils.RelativeTime
+import com.github.dhaval2404.imagepicker.ImagePicker
+import com.google.android.material.imageview.ShapeableImageView
+import com.google.android.material.shape.ShapeAppearanceModel
 import com.tommasoberlose.progressdialog.ProgressDialogFragment
+import de.hdodenhof.circleimageview.CircleImageView
+import java.io.File
 
 class ClientesDetailActivity : AppCompatActivity() {
-    private lateinit var binding: ActivityClientesDetailBinding
 
+    private val rotateOpen:Animation by lazy { AnimationUtils.loadAnimation(this,R.anim.rotate_open_anim) }
+    private val rotateClose:Animation by lazy { AnimationUtils.loadAnimation(this,R.anim.rotate_close_anim) }
+    private val fromBottom:Animation by lazy { AnimationUtils.loadAnimation(this,R.anim.from_bottom_anim) }
+    private val toBottom:Animation by lazy { AnimationUtils.loadAnimation(this,R.anim.to_bottom_anim) }
+
+
+    val clientProvider = ClientProvider()
+    private lateinit var binding: ActivityClientesDetailBinding
     private var clienteProvider = ClientProvider()
     private var extraId = ""
     private var progressDialog = ProgressDialogFragment
     var cliente:Client? = null
     val REQUEST_PHONE_CALL = 30
     var seleccion = ""
+    private var clicked = false
+    private var forma = false
+    private var imageFile: File? = null
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -52,39 +77,197 @@ class ClientesDetailActivity : AppCompatActivity() {
         getCliente()
 
         binding.imageViewBack.setOnClickListener { finish() }
-        binding.layoutTelefonoCliente.setOnClickListener {
+        binding.iconTelefono.setOnClickListener {
 
             llamarPorTelefono()
         }
+        binding.iconWhatSapp.setOnClickListener{
+            if (cliente?.phone!= null){
+                whatSapp(cliente?.phone!!)
+            }
+        }
+        binding.addbtn.setOnClickListener{
+        onAddButtonClicked()
+        }
+        binding.floatingActionEdit.setOnClickListener{
+            updateInfo()
+        }
+        binding.floatingActionDelete.setOnClickListener {
+            Toast.makeText(this, "No se puede Borrar un cliente!", Toast.LENGTH_SHORT).show()
+        }
+        binding.circleImageProfileCliente.setOnClickListener{
+            selectImage()
+        }
+
     }
-    //PREGUNTA POR DONDE DESEA UBICAR AL CLIENTE
-    private fun whatsaapOTelefono() {
-        val opciones = arrayOf("Enviar Msj WhatsApp", "LLamar por Telefono")
-        val singleChoiceDialogo = AlertDialog.Builder(this)
-            .setTitle("Seleccione")
 
-            .setSingleChoiceItems(opciones, 0) { dialog, which ->
-
-                // Aquí puedes hacer lo que necesites con la opción seleccionada
-                // Por ejemplo, mostrarla en un Toast:
-                Toast.makeText(this, "Seleccionaste la opción ${opciones[which]}", Toast.LENGTH_SHORT).show()
-                seleccion = opciones[which]
+    //SELECIONA LA FOTO
+    private fun selectImage() {
+        ImagePicker.with(this)
+            .crop()
+            .compress(1024)
+            .maxResultSize(1080,1080)
+            .createIntent { intent ->
+                startImageForResult.launch(intent)
             }
-            .setIcon(R.drawable.whatsappsinbordecien)
-
-            .setPositiveButton("Aceptar"){_,_ ->
-                Toast.makeText(this, "Seleccionaste aceptar $seleccion", Toast.LENGTH_LONG).show()
-
-
-            }
-            .setNegativeButton("Cancelar"){_,_ ->
-                return@setNegativeButton
-                Toast.makeText(this, "Seleccionaste Cancelar", Toast.LENGTH_SHORT).show()
-            }
-            .create()
-
-        singleChoiceDialogo.show()
     }
+    //SELECCIONA LA FOTO*******
+    private val startImageForResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result: ActivityResult ->
+
+        val resultCode = result.resultCode
+        val data = result.data
+
+        if (resultCode == Activity.RESULT_OK) {
+            val fileUri = data?.data
+            imageFile = File(fileUri?.path)
+            binding.circleImageProfileCliente.setImageURI(fileUri)
+        }
+        else if (resultCode == ImagePicker.RESULT_ERROR) {
+            Toast.makeText(this, ImagePicker.getError(data), Toast.LENGTH_LONG).show()
+        }
+        else {
+            Toast.makeText(this, "Tarea cancelada", Toast.LENGTH_LONG).show()
+        }
+
+    }
+
+    //ACTUALIZA LA INFORMACION DEL CLIENTE
+    private fun updateInfo() {
+        progressDialog.showProgressBar(this)
+        val name = binding.textNombreClienteDetail.text.toString()
+        val lastname = binding.textApellidoClienteDetail.text.toString()
+        val phone = binding.textTelefonoCliente.text.toString()
+        val idCliente = binding.textViewIdCliente.text.toString()
+
+        val client = Client(
+            id = idCliente,
+            name = name,
+            lastname = lastname,
+            phone = phone,
+
+        )
+
+        if (imageFile != null) {
+            clientProvider.uploadImage(idCliente, imageFile!!).addOnSuccessListener { taskSnapshot ->
+                clientProvider.getImageUrl().addOnSuccessListener { url ->
+                    val imageUrl = url.toString()
+                    client.image = imageUrl
+
+                    clientProvider.update(client).addOnCompleteListener {
+                        if (it.isSuccessful) {
+                            progressDialog.hideProgressBar(this)
+                            Toast.makeText(this@ClientesDetailActivity, "Datos actualizados correctamente", Toast.LENGTH_LONG).show()
+                        }
+                        else {
+                            progressDialog.hideProgressBar(this)
+                            Toast.makeText(this@ClientesDetailActivity, "No se pudo actualizar la informacion", Toast.LENGTH_LONG).show()
+                        }
+                    }
+                    Log.d("STORAGE", "$imageUrl")
+                }
+            }
+        }
+        else {
+            clientProvider.update(client).addOnCompleteListener {
+                if (it.isSuccessful) {
+                    progressDialog.hideProgressBar(this)
+                    Toast.makeText(this@ClientesDetailActivity, "Datos actualizados correctamente", Toast.LENGTH_LONG).show()
+                }
+                else {
+                    progressDialog.hideProgressBar(this)
+                    Toast.makeText(this@ClientesDetailActivity, "No se pudo actualizar la informacion", Toast.LENGTH_LONG).show()
+                }
+            }
+        }
+
+
+    }
+
+    //ENVIAR MSJ DE WHATSAPP*******YO******
+    private fun whatSapp (phone: String){
+        var phone58 = phone
+        val cantNrotlf = phone.length // devuelve 10
+        if (cantNrotlf<=11){
+            val phone58 = "058$phone"
+            val i  = Intent(Intent.ACTION_VIEW);
+            val  uri = "whatsapp://send?phone="+phone58+"&text="+cliente?.name +" ¡Hola!\n" +
+                    "\n" +
+                    "Quiero agradecerte por descargar nuestra aplicación. ¡Es genial tenerte como parte de nuestra comunidad!\n" +
+                    "\n" +
+                    "Esperamos que puedas probarla y descubrir por ti mismo lo fácil que es usarla.\n" +
+                    "\n" +
+                    "Si tienes algún problema o sugerencia, no dudes en ponerte en contacto con nuestro equipo de soporte. Estamos siempre dispuestos a ayudar.\n" +
+                    "\n" +
+                    "¡Gracias de nuevo por descargar nuestra aplicación! Esperamos que la disfrutes.\n" +
+                    "\n" +
+                    "TAXI AHORA";
+            i.setData(Uri.parse(uri))
+            this.startActivity(i)
+        }else{
+
+            val i  = Intent(Intent.ACTION_VIEW);
+            val  uri = "whatsapp://send?phone="+phone58+"&text="+cliente?.name +" ¡Hola!\n" +
+                    "\n" +
+                    "Quiero agradecerte por descargar nuestra aplicación. ¡Es genial tenerte como parte de nuestra comunidad!\n" +
+                    "\n" +
+                    "Esperamos que puedas probarla y descubrir por ti mismo lo fácil que es usarla.\n" +
+                    "\n" +
+                    "Si tienes algún problema o sugerencia, no dudes en ponerte en contacto con nuestro equipo de soporte. Estamos siempre dispuestos a ayudar.\n" +
+                    "\n" +
+                    "¡Gracias de nuevo por descargar nuestra aplicación! Esperamos que la disfrutes.\n" +
+                    "\n" +
+                    "TAXI AHORA";
+            i.setData(Uri.parse(uri))
+            this.startActivity(i)
+        }
+
+
+    }
+
+
+    //ANIMA EL FLOATINBOTTOM
+    private fun onAddButtonClicked() {
+       // Log.d("Cliquio", "dio CLICK EN  on addButton EL BOTON= $clicked ")
+        setVisibility(clicked)
+        setAnimation(clicked)
+        setClickable(clicked)
+        clicked = !clicked
+    }
+
+    //ACTIVA LA ANIMACION EL FLOATINBOTTOM
+    private fun setAnimation(clicked: Boolean) {
+        if (!clicked){
+            binding.floatingActionEdit.startAnimation(fromBottom)
+            binding.floatingActionDelete.startAnimation(fromBottom)
+            binding.addbtn.startAnimation(rotateOpen)
+        }else{
+            binding.floatingActionEdit.startAnimation(toBottom)
+            binding.floatingActionDelete.startAnimation(toBottom)
+            binding.addbtn.startAnimation(rotateClose)
+        }
+    }
+
+    //VISIBLE Y INVISBLE LOS BOTONES FLOATING******
+    private fun setVisibility(clicked: Boolean) {
+      //  Log.d("Cliquio", "dio CLICK EN EL BOTON SetVisivilty= $clicked")
+        if (!clicked){
+            binding.floatingActionDelete.visibility = View.VISIBLE
+            binding.floatingActionEdit.visibility= View.VISIBLE
+        }else{
+            binding.floatingActionDelete.visibility = View.INVISIBLE
+            binding.floatingActionEdit.visibility= View.INVISIBLE
+        }
+    }
+    private fun setClickable(clicked: Boolean){
+        if (!clicked){
+            binding.floatingActionDelete.isClickable = true
+            binding.floatingActionEdit.isClickable= true
+        }else{
+            binding.floatingActionDelete.isClickable = false
+            binding.floatingActionEdit.isClickable= false
+        }
+    }
+
 
 
     private fun llamarPorTelefono() {
@@ -130,11 +313,11 @@ class ClientesDetailActivity : AppCompatActivity() {
 
             if (document.exists()) {
                 cliente = document.toObject(Client::class.java)
-                binding.textViewIdCliente.text = cliente?.id
-                binding.textNombreCliente.text =  cliente?.name +" "+ cliente?.lastname
-
+                binding.textViewIdCliente.setText(cliente?.id)
+                binding.textNombreClienteDetail.setText(cliente?.name)
+                binding.textApellidoClienteDetail.setText(cliente?.lastname)
                 binding.textEmailCliente.text= cliente?.email.toString()
-                binding.textTelefonoCliente.text = cliente?.phone.toString()
+                binding.textTelefonoCliente.setText(cliente?.phone.toString())
                 binding.textViewNameCond.text = cliente?.name +" "+ cliente?.lastname
                 if (cliente?.image != null) {
                     if (cliente?.image != "") {

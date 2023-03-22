@@ -30,7 +30,7 @@ class ModalBottomSheetMenu: BottomSheetDialogFragment() {
     var linearLayoutLogout: LinearLayout? = null
     var linearLayoutProfile: LinearLayout? = null
     var linearLayoutHistory: LinearLayout? = null
-    var linearLayoutLlamar: LinearLayout? = null
+    var linearLayoutConect: LinearLayout? = null
     var linearLayoutConductores: LinearLayout? = null
     var linearLayoutClientes: LinearLayout? = null
     var linearLayoutSolicitudes: LinearLayout? = null
@@ -49,7 +49,7 @@ class ModalBottomSheetMenu: BottomSheetDialogFragment() {
         linearLayoutLogout = view.findViewById(R.id.linearLayoutLogout)
         linearLayoutProfile = view.findViewById(R.id.linearLayoutProfile)
         linearLayoutHistory = view.findViewById(R.id.linearLayoutHistory)
-        linearLayoutLlamar = view.findViewById(R.id.linearLayoutLlamar)
+        linearLayoutConect = view.findViewById(R.id.linearLayoutConectados)
         linearLayoutConductores = view.findViewById(R.id.linearLayoutConductor)
         linearLayoutClientes = view.findViewById(R.id.linearLayoutCliente)
         linearLayoutSolicitudes = view.findViewById(R.id.linearLayoutSolicitudes)
@@ -61,19 +61,25 @@ class ModalBottomSheetMenu: BottomSheetDialogFragment() {
         linearLayoutProfile?.setOnClickListener { goToProfile() }
         linearLayoutHistory?.setOnClickListener { goToHistories() }
         linearLayoutClientes?.setOnClickListener { goToClientes() }
-        linearLayoutLlamar?.setOnClickListener {
-
-            val driverTlf = "0584243454032"
-                whatSapp(driverTlf)
-
-
-
-        }
+        linearLayoutConect?.setOnClickListener {goToConectados() }
         linearLayoutConductores?.setOnClickListener { verConductores() }
         linearLayoutSolicitudes?.setOnClickListener { verSolicitudes() }
+        linearLayoutHistoriasCanceladas?.setOnClickListener { verHistoriaCanceldas() }
 
 
         return view
+    }
+
+    private fun goToConectados() {
+        val i = Intent(activity, ConectadosActivity::class.java)
+        //i.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(i)
+    }
+
+    private fun verHistoriaCanceldas() {
+        val i = Intent(activity, HistoryCancelActivity::class.java)
+        //i.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(i)
     }
 
     private fun verSolicitudes() {
