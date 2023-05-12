@@ -191,24 +191,24 @@ class MainActivity : AppCompatActivity() {
     }
 
     //VERIFICA QUE TIPO DE SUSARIO ES DENTRO DE LA BASE DE DATO*********
-    private fun verificarTipoUsuario() {
-
-            clientProvider.getClientById(authProvider.getId()).addOnSuccessListener { document ->
-                if (document.exists()) {
-                    val client = document.toObject(Client::class.java)
-                    val tipoUsuario = client?.tipoUsuario.toString()
-                    if (tipoUsuario == "Administrador"){
-                        goToMap()
-                    }else{
-                        Toast.makeText(this, "Tiene que estar Registrado Como Administrador", Toast.LENGTH_LONG).show()
-
-                    }
-                }
-
-            }
-
-
-    }
+//    private fun verificarTipoUsuario() {
+//
+//            clientProvider.getClientById(authProvider.getId()).addOnSuccessListener { document ->
+//                if (document.exists()) {
+//                    val client = document.toObject(Client::class.java)
+//                    val tipoUsuario = client?.tipoUsuario.toString()
+//                    if (tipoUsuario == "Administrador"){
+//                        goToMap()
+//                    }else{
+//                        Toast.makeText(this, "Tiene que estar Registrado Como Administrador", Toast.LENGTH_LONG).show()
+//
+//                    }
+//                }
+//
+//            }
+//
+//
+//    }
 
     private fun goToMap() {
         val i = Intent(this, MapActivity::class.java)

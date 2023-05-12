@@ -15,6 +15,7 @@ import com.carlosvicente.gaugegrafico.activities.ConductoresDetailActivity
 import com.carlosvicente.gaugegrafico.activities.HistoryCancelDetailActivity
 import com.carlosvicente.gaugegrafico.models.Driver
 import com.carlosvicente.gaugegrafico.models.HistoryCancel
+import com.carlosvicente.gaugegrafico.utils.RelativeTime
 
 class HistoryCancelAdapter(val context: Activity, var historysCancel: ArrayList<HistoryCancel>): RecyclerView.Adapter<HistoryCancelAdapter.HistoryAdapterViewHolder>() {
 
@@ -31,7 +32,11 @@ class HistoryCancelAdapter(val context: Activity, var historysCancel: ArrayList<
 
 
         holder.textIdHistoryCancel.text = histoyCancel.id
+        if (histoyCancel.timestamp!=null){
+            holder.textHistoriaCancelTimestamp.text = RelativeTime.getTimeAgo(histoyCancel.timestamp!!, context)// AQUI VA TIME STAMP
+        }
         holder.textFechaHistoryCancel.text = histoyCancel.fecha.toString()
+
         holder.textIdClientHCancel.text = histoyCancel.idClient
         holder.textIdCondCancelada.text = histoyCancel.idDriver
         holder.textDestinoCancel.text = histoyCancel.destination
@@ -70,6 +75,8 @@ class HistoryCancelAdapter(val context: Activity, var historysCancel: ArrayList<
         val textIdCondCancelada: TextView
         val textDestinoCancel: TextView
         val textCausaCancel: TextView
+        val textHistoriaCancelTimestamp: TextView
+
 
         init {
             textIdHistoryCancel= view.findViewById(R.id.textIdHistoryCancel)
@@ -78,6 +85,7 @@ class HistoryCancelAdapter(val context: Activity, var historysCancel: ArrayList<
             textIdCondCancelada = view.findViewById(R.id.textIdCondCancelada)
             textDestinoCancel= view.findViewById(R.id.textDestinoCancel)
             textCausaCancel= view.findViewById(R.id.textCausaCancel)
+            textHistoriaCancelTimestamp= view.findViewById(R.id.textHistoCancelTimetamp)
         }
 
     }

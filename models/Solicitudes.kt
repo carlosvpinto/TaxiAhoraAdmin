@@ -18,7 +18,7 @@ data class Solicitudes (
     val name: String ? = null,
     val origin: String ? = null,
     var phone: String? = null,
-    var tiempo: Int? = null
+    val time: Long? = null,
 
 ) {
 

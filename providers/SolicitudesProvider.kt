@@ -53,8 +53,9 @@ class SolicitudesProvider {
 //        return db.document(id).get()
 //    }
     fun getSolicitudes(): Query {
-        return db
+        return db.orderBy("time",Query.Direction.DESCENDING)
     }
+
 
 
 
@@ -73,7 +74,7 @@ class SolicitudesProvider {
         map["idDriver"] = solicitudes?.idDriver!!
         map["origin"] = solicitudes?.origin!!
         map["fecha"] = solicitudes?.fecha!!
-        map["time"] = solicitudes?.tiempo!!
+        map["time"] = solicitudes?.time!!
         return db.document(solicitudes?.id!!).update(map)
     }
 

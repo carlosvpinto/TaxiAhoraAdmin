@@ -54,14 +54,11 @@ class ClienteActivity : AppCompatActivity() {
                 position: Int,
                 id: Long,
             ) {
-
                 if (position== 0){campo= "id"}
                 if (position== 1){campo="name"}
                 if (position== 2){campo="apellido"}
                 if (position== 3){campo="email"}
                 if (position== 4){campo="telefono"}
-
-
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {
@@ -108,11 +105,7 @@ class ClienteActivity : AppCompatActivity() {
 
 
         }
-
-
         getCliente()
-
-
     }
 
 

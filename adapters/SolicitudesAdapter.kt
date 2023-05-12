@@ -15,6 +15,7 @@ import com.carlosvicente.gaugegrafico.activities.HistoriesDetailActivity
 import com.carlosvicente.gaugegrafico.activities.SolicitudesDetailActivity
 import com.carlosvicente.gaugegrafico.models.Client
 import com.carlosvicente.gaugegrafico.models.Solicitudes
+import com.carlosvicente.gaugegrafico.utils.RelativeTime
 
 class SolicitudesAdapter(val context: Activity, var solicitudes: ArrayList<Solicitudes>): RecyclerView.Adapter<SolicitudesAdapter.SolicitudesAdapterViewHolder>() {
 
@@ -29,6 +30,9 @@ class SolicitudesAdapter(val context: Activity, var solicitudes: ArrayList<Solic
 
         val solicitud =  solicitudes[position] // UN SOLO HISTORIAL
         holder.textIdSolicitud.text= solicitud.id
+        if (solicitud.time!=null){
+            holder.textFechaTimestamp.text = RelativeTime.getTimeAgo(solicitud.time!!, context)// AQUI VA TIME STAMP
+        }
         holder.textNombreCliSolicitud.text = solicitud.name
         holder.textApellidoClientSolicitud.text = solicitud.lastname
         holder.textIdDriverSolicitud.text = solicitud.idDriver
@@ -65,6 +69,7 @@ class SolicitudesAdapter(val context: Activity, var solicitudes: ArrayList<Solic
         val textIdDriverSolicitud: TextView
         val textDestinoSolicitud: TextView
         val textFechaSolicitud: TextView
+        val textFechaTimestamp: TextView
 
         init {
 
@@ -74,6 +79,8 @@ class SolicitudesAdapter(val context: Activity, var solicitudes: ArrayList<Solic
             textIdDriverSolicitud = view.findViewById(R.id.textIdCondSolicitud)
             textDestinoSolicitud = view.findViewById(R.id.textDestinoSolicitud)
             textFechaSolicitud = view.findViewById(R.id.textFechaSolicitud)
+            textFechaTimestamp = view.findViewById(R.id.textFechaTimestamp)
+
 
         }
 

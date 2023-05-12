@@ -15,6 +15,8 @@ class HistoryCancelProvider {
 
     val db = Firebase.firestore.collection("HistoriesCancel")
     val authProvider = AuthProvider()
+    val query = db.orderBy("timestamp", Query.Direction.DESCENDING)
+
 
     fun create(history: HistoryDriverCancel): Task<DocumentReference> {
         return db.add(history).addOnFailureListener {
@@ -33,8 +35,9 @@ class HistoryCancelProvider {
         return db.whereEqualTo("idDriver", authProvider.getId()).orderBy("timestamp", Query.Direction.DESCENDING).limit(1)
 
     }
+
     fun getHistoryCancel(): Query {
-        return db
+        return db.orderBy("timestamp",Query.Direction.DESCENDING)
     }
     fun remove(IdHistoryCancel:String): Task<Void> {
         return db.document(IdHistoryCancel).delete().addOnFailureListener { exception ->

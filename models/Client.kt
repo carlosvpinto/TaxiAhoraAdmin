@@ -13,6 +13,7 @@ data class Client (
     var image: String? = null,
     var token: String? = null,
     var tipoUsuario: String? = null,
+    var billetera: Double? = null,
 ) {
 
 

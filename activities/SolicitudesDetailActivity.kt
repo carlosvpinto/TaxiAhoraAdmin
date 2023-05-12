@@ -23,6 +23,7 @@ import com.carlosvicente.gaugegrafico.models.Solicitudes
 import com.carlosvicente.gaugegrafico.providers.DriverProvider
 import com.carlosvicente.gaugegrafico.providers.HistoryProvider
 import com.carlosvicente.gaugegrafico.providers.SolicitudesProvider
+import com.carlosvicente.gaugegrafico.utils.RelativeTime
 import com.tommasoberlose.progressdialog.ProgressDialogFragment
 import java.io.File
 
@@ -247,6 +248,7 @@ class SolicitudesDetailActivity : AppCompatActivity() {
                 solicitud = document.toObject(Solicitudes::class.java)
 
                 binding.textIdSolicitud.text= extraId
+                binding.textTiempoStamp.text = RelativeTime.getTimeAgo(solicitud?.time!!, this)
                 binding.textNombreCondu.text = solicitud?.name + " " + solicitud?.lastname
                 binding.textDestino.text = solicitud?.destination
                 binding.textEmailSolicitud.text= solicitud?.email

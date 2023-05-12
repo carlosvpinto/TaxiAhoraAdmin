@@ -7,6 +7,7 @@ private val klaxon = Klaxon()
 
 data class Conectado (
     var id: String? = null,
+    var name: String?=null
 //    val g: String ? = null,
 //    val l: String? = null,
 

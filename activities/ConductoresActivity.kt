@@ -53,6 +53,7 @@ class ConductoresActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         progressDialog.showProgressBar(this)
+        cargarToolBar()
 
         spConductores= findViewById(R.id.spinnerConductor)
         txtFiltro = findViewById(R.id.editTexFiltro)
@@ -131,6 +132,22 @@ class ConductoresActivity : AppCompatActivity() {
         getConductor()
 
 
+    }
+// carga Tool bar************
+    private fun cargarToolBar() {
+        //CORREGIR EL ACTION BAR
+        val actionBar = (this as AppCompatActivity).supportActionBar
+        if (actionBar != null) {
+            // El tema actual utiliza ActionBar
+            Log.d("TEMA", "ENTRO A TEMA CON ACTION VAR")
+        } else {
+            Log.d("TEMA", "ENTRO A TEMA SIN ACTION VAR")
+            setSupportActionBar(binding.toolbar)
+        }
+
+        supportActionBar?.title = "Conductores"
+        //supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        binding.toolbar.setTitleTextColor(Color.WHITE)
     }
 
 

@@ -1,10 +1,13 @@
 package com.carlosvicente.gaugegrafico.activities
 
 import android.Manifest
+import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.res.Resources
+import android.graphics.Color
 import com.google.android.gms.common.api.Status
 import android.location.Geocoder
 import android.location.Location
@@ -12,21 +15,23 @@ import android.os.Build
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
-import android.view.WindowManager
+import android.view.Menu
+import android.view.MenuItem
+import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.core.app.ActivityCompat
 import com.carlosvicente.gaugegrafico.R
+import com.carlosvicente.gaugegrafico.adapters.ClientesAdapter
 import com.carlosvicente.gaugegrafico.databinding.ActivityMapBinding
 import com.carlosvicente.gaugegrafico.models.Booking
 import com.carlosvicente.gaugegrafico.models.DriverLocation
-import com.carlosvicente.gaugegrafico.providers.AuthProvider
-import com.carlosvicente.gaugegrafico.providers.BookingProvider
-import com.carlosvicente.gaugegrafico.providers.ClientProvider
-import com.carlosvicente.gaugegrafico.providers.GeoProvider
 import com.carlosvicente.gaugegrafico.utils.CarMoveAnim
 import com.carlosvicente.gaugegrafico.fragments.ModalBottomSheetMenu
+import com.carlosvicente.gaugegrafico.models.Client
+import com.carlosvicente.gaugegrafico.models.PagoMovil
+import com.carlosvicente.gaugegrafico.providers.*
 import com.example.easywaylocation.EasyWayLocation
 import com.example.easywaylocation.Listener
 import com.google.android.gms.location.LocationRequest
@@ -42,12 +47,16 @@ import com.google.android.libraries.places.api.model.RectangularBounds
 import com.google.android.libraries.places.api.net.PlacesClient
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener
+import com.google.android.material.bottomnavigation.BottomNavigationView
 
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.GeoPoint
 import com.google.maps.android.SphericalUtil
+import com.tommasoberlose.progressdialog.ProgressDialogFragment
 import org.imperiumlabs.geofirestore.callbacks.GeoQueryEventListener
+import java.util.*
+import kotlin.collections.ArrayList
 
 class MapActivity : AppCompatActivity(), OnMapReadyCallback, Listener {
 
@@ -60,6 +69,11 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, Listener {
     private val authProvider = AuthProvider()
     private val clientProvider = ClientProvider()
     private val bookingProvider = BookingProvider()
+    private var pagoMovilProvider = PagoMovilProvider()
+    private var clienteProvider = ClientProvider()
+    private var clientes = ArrayList<Client>()
+    private var progressDialog = ProgressDialogFragment
+    var monto = 0.0
 
     // GOOGLE PLACES
     private var places: PlacesClient? = null
@@ -73,6 +87,12 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, Listener {
     private var isLocationEnabled = false
     private var idDriver = ""
 
+    //PARA EL NAV NAR
+    lateinit var navigation : BottomNavigationView
+    //lateinit var badge : BadgeDrawable
+    private var numero = 0
+    var verificado = false
+
 
     // PARA MOTO
     private val driverMarkersMoto = ArrayList<Marker>()
@@ -85,6 +105,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, Listener {
 
     //PARA VERIFICAR CON GOOGLE
     private lateinit var auth : FirebaseAuth
+    private lateinit var myActivity :Activity
 
 
 
@@ -94,15 +115,21 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, Listener {
         super.onCreate(savedInstanceState)
         binding = ActivityMapBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        window.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
+        //window.setFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS, WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS)
 
 
         //PARA VERIFICAR CON GOOGLE
         auth = FirebaseAuth.getInstance()
-
+//        badge = BadgeDrawable.create(this)
 
         val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
+        navigation= findViewById(R.id.navMenu)
+        cargarToolBar()
+        CargarFragment()
+
+
+
 
         val locationRequest = LocationRequest.create().apply {
             interval = 0
@@ -118,6 +145,9 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, Listener {
             Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.ACCESS_COARSE_LOCATION
         ))
+
+
+
         googleAnalytics()
         startGooglePlaces()
         removeBooking()
@@ -129,7 +159,208 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback, Listener {
         binding.imageViewSalir.setOnClickListener{salirdelApp()}
 
 
+
        // binding.txtposicionActual.setOnClickListener{irPosicionActual()}
+    }
+
+    // PARA CARGAR NAV BAR Y TOLBAR*********** abajo
+    private fun CargarFragment() {
+        navigation.setOnItemSelectedListener{
+            when (it.itemId) {
+                R.id.itemClientes -> {
+                    myActivity = ClienteActivity()
+                    goToActivity(myActivity)
+                    return@setOnItemSelectedListener true
+                }
+                R.id.itemConectados -> {
+
+                    myActivity = ConectadosActivity()
+                    goToActivity(myActivity)
+                    return@setOnItemSelectedListener true
+                }
+                R.id.itemHistorias -> {
+                    myActivity = HistoriesActivity()
+                    goToActivity(myActivity)
+                    return@setOnItemSelectedListener true
+                }
+                R.id.itemSolicitudes -> {
+
+                    myActivity = SolicitudesActivity()
+                    goToActivity(myActivity)
+                    return@setOnItemSelectedListener true
+                }
+                R.id.itemCanceladas -> {
+                    myActivity = HistoryCancelActivity()
+                    goToActivity(myActivity)
+                    return@setOnItemSelectedListener true
+                }
+
+            }
+            false
+        }
+    }
+
+
+    // carga Tool bar************ arriba
+    private fun cargarToolBar() {
+        //CORREGIR EL ACTION BAR
+        val actionBar = (this as AppCompatActivity).supportActionBar
+        if (actionBar != null) {
+            // El tema actual utiliza ActionBar
+            Log.d("TEMA", "ENTRO A TEMA CON ACTION VAR")
+        } else {
+            Log.d("TEMA", "ENTRO A TEMA SIN ACTION VAR")
+            //badge= BadgeDrawable.create(this)
+            setSupportActionBar(binding.toolbarArriba)
+        }
+
+        supportActionBar?.title = "Administrativo TAXI AHORA"
+        //supportActionBar?.setDisplayHomeAsUpEnabled(true)
+
+        binding.toolbarArriba.setTitleTextColor(Color.WHITE)
+    }
+
+    @SuppressLint("UnsafeOptInUsageError")
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        val inflater = menuInflater
+        inflater.inflate(R.menu.menu1,menu)
+
+        // BadgeUtils.attachBadgeDrawable(badge,binding.toolbar, R.id.item1)
+
+        //  badge.number = contador
+        return super.onCreateOptionsMenu(menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+
+        when(item.itemId){
+            R.id.itemHome->{
+                myActivity = MapActivity()
+                goToActivity(myActivity)
+            }
+            R.id.item1->{
+                // badge.number= contador++
+                myActivity = ProfileActivity()
+                goToActivity(myActivity)
+            }
+            R.id.itemCerrarSecion->{
+                authProvider.logout()
+                myActivity = MainActivity()
+                goToActivity(myActivity)
+            }
+            R.id.itemConductores->{
+                myActivity = ConductoresActivity()
+                goToActivity(myActivity)
+            }
+            R.id.itemVerificados->{
+                verificado = true
+                myActivity = PagoMovilActivity()
+                goToActivity(myActivity)
+            }
+            R.id.itemSinVerificados->{
+                verificado = false
+                myActivity = PagoMovilActivity()
+                goToActivity(myActivity)
+            }
+            R.id.itemAgregarSaldo->{
+                agregarSaldo()
+            }
+            R.id.itemBilleteraSub->{
+                myActivity = PagoMovilActivity()
+                goToActivity(myActivity)
+              // agregarSaldo()
+            }
+
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
+    private fun goToActivity(activity: Activity) {
+        val intent = Intent(this, activity::class.java)
+        intent.putExtra("verificado", verificado)
+        startActivity(intent)
+    }
+
+    //agregarSaldo AL LOS CLIENTES
+    private fun agregarSaldo(){
+        val builder = AlertDialog.Builder(this)
+        val input = EditText(this)
+
+        builder.setTitle("Ingresa El monto")
+        builder.setView(input)
+
+        builder.setPositiveButton("Aceptar") { dialog, which ->
+             monto = input.text.toString().toDouble()
+            // Aquí puedes hacer algo con el nombre ingresado
+        getCliente()
+           // Toast.makeText(this, "El monto agregado fue $monto", Toast.LENGTH_SHORT).show()
+        }
+
+        builder.setNegativeButton("Cancelar") { dialog, which ->
+            dialog.cancel()
+        }
+
+        builder.show()
+
+    }
+
+
+    //CREA LA SOLICITUD DE VIAJE CON ESTATUS "create"
+    private fun createPagomovil() {
+        var indice = 0
+        for (i in clientes){
+
+            val pagoMovil = PagoMovil(
+
+                idClient = clientes[indice].id ,
+                nro="99999",
+                montoBs = 25.0,
+                montoDollar = monto,
+                fechaPago = "09/05/2023",
+                tazaCambiaria = 25.0,
+                timestamp = Date().time,
+                verificado = true,
+                date = Date()
+
+
+
+            )
+            indice++
+            pagoMovilProvider.createRegalo(pagoMovil).addOnCompleteListener {
+                if (it.isSuccessful) {
+        //            Log.d("REGALOS", "createPagomovil: ${clientes[indice].id}")
+                    //limpiarEditTexts(this)
+                } else {
+         //           Log.d("REGALOS", "createPagomovil: ${clientes[indice].id}")
+                }
+            }
+        }
+
+    }
+
+    //OBTIENE TODOS LOS CLIENTES
+    private fun getCliente() {
+        clientes.clear()
+
+        clienteProvider.getCliente().get().addOnSuccessListener { query ->
+
+            if (query != null) {
+                if (query.documents.size > 0) {
+                    val documents = query.documents
+
+                    for (d in documents) {
+                        var client = d.toObject(Client::class.java)
+                        client?.id = d.id
+                        clientes.add(client!!)
+                    }
+
+
+
+                }
+            }
+            progressDialog.hideProgressBar(this)
+            createPagomovil()
+        }
     }
 
 

@@ -138,12 +138,14 @@ class ClientesDetailActivity : AppCompatActivity() {
         val lastname = binding.textApellidoClienteDetail.text.toString()
         val phone = binding.textTelefonoCliente.text.toString()
         val idCliente = binding.textViewIdCliente.text.toString()
+        val billetera = binding.textBilleteraCliente.text.toString().toDouble()
 
         val client = Client(
             id = idCliente,
             name = name,
             lastname = lastname,
             phone = phone,
+            billetera=billetera,
 
         )
 
@@ -319,10 +321,13 @@ class ClientesDetailActivity : AppCompatActivity() {
                 binding.textEmailCliente.text= cliente?.email.toString()
                 binding.textTelefonoCliente.setText(cliente?.phone.toString())
                 binding.textViewNameCond.text = cliente?.name +" "+ cliente?.lastname
+                binding.textBilleteraCliente.text= cliente?.billetera.toString()
                 if (cliente?.image != null) {
                     if (cliente?.image != "") {
                         Glide.with(this).load(cliente?.image).into(binding.circleImageProfileCliente)
                     }
+                }else{
+                    Toast.makeText(this, "Sin Foto", Toast.LENGTH_SHORT).show()
                 }
                 //getDriverInfo(conductor?.id!!)
             }
